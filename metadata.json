@@ -1,0 +1,6 @@
+{
+  "name": "APK Shield Premium",
+  "description": "A modern Android APK security scanner and malware analysis application with advanced local static rules and Gemini-powered AI threat analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
