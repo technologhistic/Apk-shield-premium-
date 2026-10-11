@@ -33,8 +33,8 @@ export default function App() {
   const [scanHistory, setScanHistory] = useState<AppScanResult[]>([]);
   const [selectedReport, setSelectedReport] = useState<AppScanResult | null>(null);
 
-  // Feature Flags
-  const [isPremium, setIsPremium] = useState<boolean>(false);
+  // Feature Flags - Premium is permanently active
+  const [isPremium] = useState<boolean>(true);
   const [isRealTimeEnabled, setIsRealTimeEnabled] = useState<boolean>(true);
   const [isCloudSyncEnabled, setIsCloudSyncEnabled] = useState<boolean>(false);
 
@@ -53,26 +53,6 @@ export default function App() {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);
   };
-
-  // Prepopulate history with initial realistic scans on mount
-  useEffect(() => {
-    const seedHistory = async () => {
-      try {
-        const cleanerApp = INITIAL_INSTALLED_APPS.find((a) => a.packageName === 'com.cleaner.speedup.smspay');
-        const bankApp = INITIAL_INSTALLED_APPS.find((a) => a.packageName === 'com.safebank.mobile.secure');
-
-        if (cleanerApp && bankApp) {
-          const report1 = await analyzeLocalApp(cleanerApp);
-          const report2 = await analyzeLocalApp(bankApp);
-          setScanHistory([report1, report2]);
-          setSelectedReport(report1);
-        }
-      } catch (err) {
-        console.error('Failed to seed initial reports', err);
-      }
-    };
-    seedHistory();
-  }, []);
 
   // System Security Calculations
   const securityScore = React.useMemo(() => {
@@ -167,6 +147,16 @@ export default function App() {
         if (isProtectedCompanion(result.packageName)) {
           showToast('Protected APK Shield application detected. Scan skipped.', 'info');
         } else {
+          setInstalledApps((prev) => [
+            {
+              packageName: result.packageName,
+              appName: result.appName,
+              isSystem: false,
+              targetSdk: result.targetSdk,
+              category: 'Scanned APK'
+            },
+            ...prev.filter((a) => a.packageName !== result.packageName)
+          ]);
           setScanHistory((prev) => [result, ...prev.filter((r) => r.packageName !== result.packageName)]);
           setSelectedReport(result);
           showToast(`APK File Scan completed: ${result.appName} is rated ${result.riskLevel}`, 'success');
@@ -181,15 +171,9 @@ export default function App() {
     }, 1600);
   };
 
-  // Rapid Scan shortcut
+  // Scan shortcut
   const handleRapidScan = () => {
-    const uninspected = installedApps.find(
-      (app) => !scanHistory.some((h) => h.packageName === app.packageName) && !isProtectedCompanion(app.packageName)
-    ) || installedApps[2] || installedApps[0];
-
-    if (uninspected) {
-      handleScanApp(uninspected.packageName);
-    }
+    setCurrentScreen('scan');
   };
 
   const handleClearHistory = () => {
@@ -199,13 +183,7 @@ export default function App() {
   };
 
   const handleTogglePremium = () => {
-    const nextVal = !isPremium;
-    setIsPremium(nextVal);
-    if (nextVal) {
-      showToast('APK Shield Premium unlocked: Unlimited scans and Gemini AI Analysis active.', 'success');
-    } else {
-      showToast('Premium subscription suspended. AI analysis disabled.', 'info');
-    }
+    // togglePremiumStatus() does nothing now since Premium is permanently active
   };
 
   const handleToggleRealTime = () => {
@@ -292,12 +270,15 @@ export default function App() {
 
         {currentScreen === 'scan' && (
           <ScanScreen
-            installedApps={installedApps}
             isScanning={isScanning}
             scanningApp={scanningApp}
             scanProgress={scanProgress}
             isPremium={isPremium}
-            onScanApp={handleScanApp}
+            scanHistory={scanHistory}
+            onSelectReport={(report) => {
+              setSelectedReport(report);
+              setCurrentScreen('reports');
+            }}
             onScanApkFile={handleScanApkFile}
           />
         )}

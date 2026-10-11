@@ -104,25 +104,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             To preserve system performance and avoid infinite looping analysis pipelines, APK Shield applications enforce a strict mutual bypass protocol. APK Shield Premium will never analyze APK Shield Free, and APK Shield Free will never analyze APK Shield Premium.
           </p>
 
-          <div className="bg-[#0C121E] border border-[#334155]/60 rounded-2xl p-3.5 space-y-2 font-mono text-xs">
-            <div>
-              <span className="text-[10px] text-[#06B6D4] font-bold block uppercase tracking-wider">
-                Whitelisted Package ID Strings:
-              </span>
-              <p className="text-[#10B981] text-[11px] mt-0.5">
-                • com.aistudio.apkshieldpremium.qpxz<br />
-                • com.aistudio.apkshieldfree.qpxz
-              </p>
-            </div>
-
-            <div className="border-t border-white/5 pt-2">
-              <span className="text-[10px] text-[#06B6D4] font-bold block uppercase tracking-wider">
-                Developer Certificate Cert-Sig:
-              </span>
-              <p className="text-white/70 text-[11px] mt-0.5">
-                Fingerprint: Verified SHA-256 Authority Root
-              </p>
-            </div>
+          <div className="bg-[#0C121E] border border-[#334155]/60 rounded-2xl p-3.5 space-y-1 font-mono text-xs">
+            <span className="text-[10px] text-[#06B6D4] font-bold block uppercase tracking-wider">
+              Developer Certificate Security Seal:
+            </span>
+            <p className="text-white/70 text-[11px]">
+              Fingerprint: Verified SHA-256 Authority Root (Mutual Isolation Active)
+            </p>
           </div>
         </div>
       </div>

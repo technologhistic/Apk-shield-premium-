@@ -34,16 +34,9 @@ export const Header: React.FC<{ isPremium: boolean; onTogglePremium: () => void 
         </div>
 
         <div>
-          <button
-            onClick={onTogglePremium}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-              isPremium
-                ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981] hover:bg-[#10B981]/25'
-                : 'bg-red-500/10 border-red-500/40 text-red-400 hover:bg-red-500/20'
-            }`}
-          >
-            {isPremium ? '★ PREMIUM ACTIVE' : 'FREE VERSION'}
-          </button>
+          <div className="px-3 py-1.5 rounded-lg text-xs font-bold border bg-[#10B981]/15 border-[#10B981] text-[#10B981] shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+            ★ PREMIUM ACTIVE
+          </div>
         </div>
       </div>
     </header>
@@ -85,9 +78,6 @@ export const BottomNav: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen
               <span className={`text-[10px] mt-0.5 font-medium ${isSelected ? 'font-bold text-[#10B981]' : ''}`}>
                 {item.label}
               </span>
-              {item.id === 'premium' && !isPremium && (
-                <span className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-              )}
             </button>
           );
         })}

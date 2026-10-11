@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Star,
   Search,
-  Lock,
   Play,
   Zap,
   Code,
@@ -11,8 +10,7 @@ import {
   Shield,
   Bug,
   AlertOctagon,
-  X,
-  CheckCircle2
+  X
 } from 'lucide-react';
 import {
   PremiumFeature,
@@ -38,14 +36,12 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
   scanHistory,
   isRealTimeEnabled,
   isCloudSyncEnabled,
-  onTogglePremium,
   onToggleRealTime,
   onShowToast
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeFeature, setActiveFeature] = useState<PremiumFeature | null>(null);
-  const [showSubscribeDialog, setShowSubscribeDialog] = useState(false);
 
   const features: PremiumFeature[] = [
     {
@@ -54,7 +50,7 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
       iconName: 'Zap',
       category: 'Security',
       description:
-        "Integrate with Google's state-of-the-art Gemini 2.5/3.5 models to evaluate code intent and zero-day exploits in seconds.",
+        "Integrate with Google's state-of-the-art Gemini models to evaluate code intent and zero-day exploits in seconds.",
       status: 'Ready'
     },
     {
@@ -177,16 +173,10 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
           <Star className="w-7 h-7 fill-amber-400" />
         </div>
         <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wide">
-          {isPremium ? (
-            <span className="text-[#10B981]">ACTIVE PREMIUM SECURITY COGNITION</span>
-          ) : (
-            'FREE TRIAL SUBSCRIPTION SUSPENDED'
-          )}
+          <span className="text-[#10B981]">ACTIVE PREMIUM SECURITY COGNITION</span>
         </h3>
-        <p className="text-xs text-white/70 max-w-sm mx-auto mt-1 leading-relaxed">
-          {isPremium
-            ? 'All heuristic sandboxes and deep AI audits are fully unlocked.'
-            : 'Unlock Gemini API, Bulk scan threads, and exported reports.'}
+        <p className="text-xs text-white/80 max-w-sm mx-auto mt-1 leading-relaxed">
+          All heuristic sandboxes, threat tools, and deep AI audits are fully unlocked.
         </p>
       </div>
 
@@ -257,7 +247,6 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
                       <h4 className="text-sm font-bold text-white truncate">
                         {feature.name}
                       </h4>
-                      {!isPremium && <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
                     </div>
 
                     <div className="flex items-center gap-2 mt-0.5 text-[10px]">
@@ -281,30 +270,11 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
                     </p>
 
                     <button
-                      onClick={() => {
-                        if (isPremium) {
-                          setActiveFeature(feature);
-                        } else {
-                          setShowSubscribeDialog(true);
-                        }
-                      }}
-                      className={`w-full mt-3.5 h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-transform active:scale-[0.99] cursor-pointer ${
-                        isPremium
-                          ? 'bg-[#10B981] text-black hover:bg-[#10B981]/90 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-                          : 'bg-amber-400 text-black hover:bg-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
-                      }`}
+                      onClick={() => setActiveFeature(feature)}
+                      className="w-full mt-3.5 h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-transform active:scale-[0.99] cursor-pointer bg-[#10B981] text-black hover:bg-[#10B981]/90 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
                     >
-                      {isPremium ? (
-                        <>
-                          <Play className="w-3.5 h-3.5 fill-black" />
-                          <span>Launch {feature.name}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>Unlock {feature.name}</span>
-                        </>
-                      )}
+                      <Play className="w-3.5 h-3.5 fill-black" />
+                      <span>Launch {feature.name}</span>
                     </button>
                   </div>
                 </div>
@@ -313,75 +283,6 @@ export const PremiumScreen: React.FC<PremiumScreenProps> = ({
           </div>
         )}
       </div>
-
-      {/* Subscription Toggle Panel */}
-      <div className="bg-[#1E2942]/90 border border-[#334155]/60 rounded-3xl p-5 text-center">
-        {!isPremium ? (
-          <div>
-            <h4 className="text-sm font-bold text-white">APK Shield Premium License</h4>
-            <div className="flex items-baseline justify-center gap-1 my-2">
-              <span className="text-3xl font-black text-amber-400 font-mono">$9.99</span>
-              <span className="text-xs text-[#94A3B8]">/month</span>
-            </div>
-            <button
-              onClick={onTogglePremium}
-              className="w-full h-11 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)]"
-            >
-              Unlock Premium Trial Now
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div className="flex items-center justify-center gap-2 text-[#10B981] mb-1">
-              <CheckCircle2 className="w-5 h-5" />
-              <h4 className="text-sm font-bold">Premium Protection is Active!</h4>
-            </div>
-            <p className="text-xs text-[#94A3B8] mb-4">
-              Renew date: Oct 28, 2026 • Simulated Developer License
-            </p>
-            <button
-              onClick={onTogglePremium}
-              className="w-full h-10 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/40 text-xs font-bold transition-colors cursor-pointer"
-            >
-              Deactivate Simulated Trial
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Subscribe Dialog */}
-      {showSubscribeDialog && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-sm w-full bg-[#13111C] border border-amber-400/40 rounded-3xl p-6 text-center space-y-4 animate-scale-up shadow-[0_0_50px_rgba(245,158,11,0.2)]">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center mx-auto">
-              <Lock className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-black text-white uppercase tracking-wide">
-              Unlock Elite Tools
-            </h3>
-            <p className="text-xs text-white/80 leading-relaxed">
-              This feature is part of the APK Shield Premium security suite. Activate the trial license now to immediately execute deep Gemini neural audits, perform bulk scans, compile secure PDF records, and enable cloud database backups.
-            </p>
-            <div className="space-y-2 pt-2">
-              <button
-                onClick={() => {
-                  onTogglePremium();
-                  setShowSubscribeDialog(false);
-                }}
-                className="w-full h-11 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-colors cursor-pointer"
-              >
-                Start Trial ($9.99/mo)
-              </button>
-              <button
-                onClick={() => setShowSubscribeDialog(false)}
-                className="w-full py-2 text-xs font-semibold text-[#94A3B8] hover:text-white"
-              >
-                Maybe Later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

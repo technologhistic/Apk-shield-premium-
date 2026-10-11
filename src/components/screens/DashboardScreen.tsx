@@ -137,24 +137,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Scan Action Buttons */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={onNavigateToScan}
-          className="h-14 rounded-2xl bg-[#10B981] hover:bg-[#10B981]/90 text-black font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all cursor-pointer active:scale-[0.98]"
-        >
-          <Zap className="w-5 h-5 fill-black" />
-          <span>Select & Scan</span>
-        </button>
-
-        <button
-          onClick={onRapidScan}
-          className="h-14 rounded-2xl bg-[#06B6D4] hover:bg-[#06B6D4]/90 text-black font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.25)] transition-all cursor-pointer active:scale-[0.98]"
-        >
-          <Shield className="w-5 h-5 fill-black" />
-          <span>Rapid Scan</span>
-        </button>
-      </div>
+      {/* Main Scan Action Button */}
+      <button
+        onClick={onNavigateToScan}
+        className="w-full h-14 rounded-2xl bg-[#10B981] hover:bg-[#10B981]/90 text-black font-bold text-sm flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all cursor-pointer active:scale-[0.98]"
+      >
+        <Zap className="w-5 h-5 fill-black" />
+        <span>Scan Android APK File</span>
+      </button>
 
       {/* Active Scanning Progress Card (if scanning in progress) */}
       {isScanning && (

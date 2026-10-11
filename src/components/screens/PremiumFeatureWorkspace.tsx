@@ -28,6 +28,7 @@ import {
 } from '../../types';
 import { requestAiThreatAnalysis } from '../../services/geminiService';
 import { downloadSecurityAuditReport } from '../../services/pdfService';
+import { isProtectedCompanion } from '../../services/securityAnalyzer';
 
 interface PremiumFeatureWorkspaceProps {
   feature: PremiumFeature;
@@ -86,6 +87,23 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
 
   // Heuristic Malware scanner states
   const [malwareFindings, setMalwareFindings] = useState<MalwareFinding[]>([]);
+
+  // Real candidate APK packages derived from scans
+  const candidateApps: InstalledAppItem[] = React.useMemo(() => {
+    const list: InstalledAppItem[] = [...installedApps];
+    scanHistory.forEach((h) => {
+      if (!list.some((a) => a.packageName === h.packageName)) {
+        list.push({
+          packageName: h.packageName,
+          appName: h.appName,
+          isSystem: false,
+          targetSdk: h.targetSdk,
+          category: 'Scanned APK'
+        });
+      }
+    });
+    return list.filter((a) => !isProtectedCompanion(a.packageName));
+  }, [installedApps, scanHistory]);
 
   const handleAbort = () => {
     setToolState('CANCELLED');
@@ -160,7 +178,7 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
 
   // 2. Run Batch APK Scan
   const runBatchScan = () => {
-    const targetApps = installedApps.filter((app) => selectedBulkApps[app.packageName]);
+    const targetApps = candidateApps.filter((app) => selectedBulkApps[app.packageName]);
     if (targetApps.length === 0) return;
 
     setToolState('RUNNING');
@@ -277,7 +295,7 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
       setLogs((prev) => [...prev, '[cve-catalog] Running final dependency evaluations...']);
 
       const found: CveExposure[] = [];
-      installedApps.forEach((app) => {
+      candidateApps.forEach((app) => {
         if (app.targetSdk < 31) {
           found.push({
             appName: app.appName,
@@ -319,7 +337,7 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
       setLogs((prev) => [...prev, '[heuristics] Checking package class obfuscation...']);
 
       const found: MalwareFinding[] = [];
-      installedApps.forEach((app) => {
+      candidateApps.forEach((app) => {
         if (app.packageName.includes('cleaner') || app.packageName.includes('smspay')) {
           found.push({
             appName: app.appName,
@@ -438,38 +456,44 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
                 />
               </div>
 
-              <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl max-h-56 overflow-y-auto divide-y divide-white/5">
-                {installedApps
-                  .filter(
-                    (app) =>
-                      app.appName.toLowerCase().includes(aiSearchQuery.toLowerCase()) ||
-                      app.packageName.toLowerCase().includes(aiSearchQuery.toLowerCase())
-                  )
-                  .map((app) => {
-                    const isSelected = selectedAiApp?.packageName === app.packageName;
-                    return (
-                      <div
-                        key={app.packageName}
-                        onClick={() => setSelectedAiApp(app)}
-                        className={`p-3 flex items-center justify-between cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'bg-amber-400/15 border-l-4 border-amber-400'
-                            : 'hover:bg-white/5'
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <h4 className="text-xs font-bold text-white truncate">
-                            {app.appName}
-                          </h4>
-                          <p className="text-[11px] font-mono text-[#94A3B8] truncate">
-                            {app.packageName}
-                          </p>
+              {candidateApps.length === 0 ? (
+                <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl p-6 text-center text-xs text-[#94A3B8]">
+                  No APK packages loaded yet. Upload an APK file in the Scanner tab first to run Gemini AI analysis.
+                </div>
+              ) : (
+                <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl max-h-56 overflow-y-auto divide-y divide-white/5">
+                  {candidateApps
+                    .filter(
+                      (app) =>
+                        app.appName.toLowerCase().includes(aiSearchQuery.toLowerCase()) ||
+                        app.packageName.toLowerCase().includes(aiSearchQuery.toLowerCase())
+                    )
+                    .map((app) => {
+                      const isSelected = selectedAiApp?.packageName === app.packageName;
+                      return (
+                        <div
+                          key={app.packageName}
+                          onClick={() => setSelectedAiApp(app)}
+                          className={`p-3 flex items-center justify-between cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'bg-amber-400/15 border-l-4 border-amber-400'
+                              : 'hover:bg-white/5'
+                          }`}
+                        >
+                          <div className="min-w-0 pr-2">
+                            <h4 className="text-xs font-bold text-white truncate">
+                              {app.appName}
+                            </h4>
+                            <p className="text-[11px] font-mono text-[#94A3B8] truncate">
+                              {app.packageName}
+                            </p>
+                          </div>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />}
                         </div>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />}
-                      </div>
-                    );
-                  })}
-              </div>
+                      );
+                    })}
+                </div>
+              )}
 
               <button
                 onClick={runAiAnalysis}
@@ -508,13 +532,13 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-[#94A3B8] uppercase">
                   Select Packages to Batch Audit (
-                  {Object.values(selectedBulkApps).filter(Boolean).length}/{installedApps.length})
+                  {Object.values(selectedBulkApps).filter(Boolean).length}/{candidateApps.length})
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
                       const all: Record<string, boolean> = {};
-                      installedApps.forEach((a) => (all[a.packageName] = true));
+                      candidateApps.forEach((a) => (all[a.packageName] = true));
                       setSelectedBulkApps(all);
                     }}
                     className="text-amber-400 font-bold hover:underline"
@@ -531,36 +555,42 @@ export const PremiumFeatureWorkspace: React.FC<PremiumFeatureWorkspaceProps> = (
                 </div>
               </div>
 
-              <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl max-h-60 overflow-y-auto divide-y divide-white/5">
-                {installedApps.map((app) => {
-                  const isChecked = !!selectedBulkApps[app.packageName];
-                  return (
-                    <div
-                      key={app.packageName}
-                      onClick={() =>
-                        setSelectedBulkApps((prev) => ({
-                          ...prev,
-                          [app.packageName]: !isChecked
-                        }))
-                      }
-                      className="p-3 flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {}}
-                        className="rounded accent-amber-400 w-4 h-4 cursor-pointer"
-                      />
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-white truncate">{app.appName}</h4>
-                        <p className="text-[11px] font-mono text-[#94A3B8] truncate">
-                          {app.packageName}
-                        </p>
+              {candidateApps.length === 0 ? (
+                <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl p-6 text-center text-xs text-[#94A3B8]">
+                  No APK packages loaded yet. Upload APK files in the Scanner tab first to run batch audits.
+                </div>
+              ) : (
+                <div className="bg-[#131525] border border-[#334155]/60 rounded-2xl max-h-60 overflow-y-auto divide-y divide-white/5">
+                  {candidateApps.map((app) => {
+                    const isChecked = !!selectedBulkApps[app.packageName];
+                    return (
+                      <div
+                        key={app.packageName}
+                        onClick={() =>
+                          setSelectedBulkApps((prev) => ({
+                            ...prev,
+                            [app.packageName]: !isChecked
+                          }))
+                        }
+                        className="p-3 flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          className="rounded accent-amber-400 w-4 h-4 cursor-pointer"
+                        />
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-white truncate">{app.appName}</h4>
+                          <p className="text-[11px] font-mono text-[#94A3B8] truncate">
+                            {app.packageName}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <button
                 onClick={runBatchScan}

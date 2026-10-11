@@ -10,81 +10,8 @@ export function isProtectedCompanion(packageName: string): boolean {
   return COMPANION_APPS.some((app) => app.packageName === packageName);
 }
 
-// Default device catalog of installed packages
-export const INITIAL_INSTALLED_APPS: InstalledAppItem[] = [
-  {
-    packageName: 'com.aistudio.apkshieldpremium.qpxz',
-    appName: 'APK Shield Premium',
-    isSystem: true,
-    targetSdk: 36,
-    iconColor: '#10B981',
-    category: 'Security'
-  },
-  {
-    packageName: 'com.aistudio.apkshieldfree.qpxz',
-    appName: 'APK Shield Free',
-    isSystem: true,
-    targetSdk: 36,
-    iconColor: '#06B6D4',
-    category: 'Security'
-  },
-  {
-    packageName: 'com.android.chrome',
-    appName: 'Google Chrome',
-    isSystem: true,
-    targetSdk: 35,
-    iconColor: '#3B82F6',
-    category: 'Browser'
-  },
-  {
-    packageName: 'com.safebank.mobile.secure',
-    appName: 'SafeBank Mobile',
-    isSystem: false,
-    targetSdk: 35,
-    iconColor: '#10B981',
-    category: 'Finance'
-  },
-  {
-    packageName: 'com.cleaner.speedup.smspay',
-    appName: 'Fast Cleaner & Battery Booster',
-    isSystem: false,
-    targetSdk: 28,
-    iconColor: '#EF4444',
-    category: 'Tools'
-  },
-  {
-    packageName: 'com.stealth.geotrack.agent',
-    appName: 'GPS Device Locator Pro',
-    isSystem: false,
-    targetSdk: 29,
-    iconColor: '#F59E0B',
-    category: 'Utilities'
-  },
-  {
-    packageName: 'org.retrogaming.classic',
-    appName: 'Retro Arcade Emulator 90s',
-    isSystem: false,
-    targetSdk: 27,
-    iconColor: '#8B5CF6',
-    category: 'Games'
-  },
-  {
-    packageName: 'io.cryptovault.defi.wallet',
-    appName: 'CryptoVault MultiChain',
-    isSystem: false,
-    targetSdk: 33,
-    iconColor: '#EC4899',
-    category: 'Finance'
-  },
-  {
-    packageName: 'com.android.settings',
-    appName: 'Android Settings',
-    isSystem: true,
-    targetSdk: 36,
-    iconColor: '#64748B',
-    category: 'System'
-  }
-];
+// Default installed packages catalog (initially empty, populated via real scanned APKs)
+export const INITIAL_INSTALLED_APPS: InstalledAppItem[] = [];
 
 // Helper to compute cryptographic digests using Web Crypto API
 export async function computeHash(buffer: ArrayBuffer, algorithm: 'SHA-256' | 'SHA-1'): Promise<string> {
